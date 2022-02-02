@@ -14,14 +14,23 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-      
+    
+        // MARK: Example One
+        
         let publisherLessonOne = NotificationCenter.default.publisher(for: Notification.testNotificationLessonOne, object: nil)
         let subscriberLessonOne = publisherLessonOne.sink { notification in
-            print("Hello from Combine")
-            print(notification.name.rawValue)
+            print("Received \(notification.name.rawValue)")
         }
         NotificationCenter.default.post(name: Notification.testNotificationLessonOne, object: nil, userInfo: nil)
         subscriberLessonOne.cancel()
+        
+        // MARK: Example Two
+        
+        let publisherTwo = ["Hello Combine"].publisher
+        let subscriberTwo = publisherTwo.sink { receivedValue in
+            print("Received from publisherTwo: ", receivedValue)
+        }
+        subscriberTwo.cancel()
     }
     
 }
