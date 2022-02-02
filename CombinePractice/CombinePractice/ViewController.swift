@@ -9,22 +9,21 @@ import UIKit
 import Combine
 
 class ViewController: UIViewController {
+    
+    private var cancellables = Set<AnyCancellable>()
 
     override func viewDidLoad() {
         super.viewDidLoad()
       
-        let publisherLessonOne = NotificationCenter.default.publisher(for: Notification.testNotificationLessonOne)
+        let publisherLessonOne = NotificationCenter.default.publisher(for: Notification.testNotificationLessonOne, object: nil)
+        let subscriberLessonOne = publisherLessonOne.sink { notification in
+            print("Hello from Combine")
+            print(notification.name.rawValue)
+        }
+        NotificationCenter.default.post(name: Notification.testNotificationLessonOne, object: nil, userInfo: nil)
+        subscriberLessonOne.cancel()
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        DispatchQueue.global().asyncAfter(deadline: .now() + 1) {
-            NotificationCenter.default.post(Notification(name: Notification.testNotificationLessonOne))
-        }
-    }
-
-
 }
 
 extension Notification {
