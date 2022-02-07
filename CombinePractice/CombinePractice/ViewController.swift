@@ -45,10 +45,25 @@ class ViewController: UIViewController {
             .sink(receiveValue: { numbers in
                 print(numbers)
             })
-            .cancel()
+            .store(in: &cancellables)
         
         //Lesson 2 Stage 2
         
+        let publisherStageTwo = ["1", "20", "A", "C", "50", "70", "100"].publisher
+        var total = 0
+        publisherStageTwo
+            .map { Double($0) ?? 0.0 }
+            .filter { $0 != 0.0 }
+            .scan(0, { lastNum, currentNum in
+                lastNum + currentNum
+            })
+            .sink { number in
+                total += 1
+                print("Current sum: \(number)")
+                print("Current iteration: \(total)")
+                print("Average = \(number / Double(total))\n")
+            }
+            .store(in: &cancellables)
     }
     
 }
