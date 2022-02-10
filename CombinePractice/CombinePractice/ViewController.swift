@@ -37,33 +37,55 @@ class ViewController: UIViewController {
         
         //Lesson 2 Stage 1
         
-        let publisherStageOne = (1...100).publisher
-        publisherStageOne
-            .filter { $0 > 49 && $0 < 71 }
-            .filter { $0 % 2 == 0 }
-            .collect()
-            .sink(receiveValue: { numbers in
-                print(numbers)
-            })
-            .store(in: &cancellables)
+//        let publisherStageOne = (1...100).publisher
+//        publisherStageOne
+//            .filter { $0 > 49 && $0 < 71 }
+//            .filter { $0 % 2 == 0 }
+//            .collect()
+//            .sink(receiveValue: { numbers in
+//                print(numbers)
+//            })
+//            .store(in: &cancellables)
         
         //Lesson 2 Stage 2
         
-        let publisherStageTwo = ["1", "20", "A", "C", "50", "70", "100"].publisher
-        var total = 0
-        publisherStageTwo
-            .map { Double($0) ?? 0.0 }
-            .filter { $0 != 0.0 }
-            .scan(0, { lastNum, currentNum in
-                lastNum + currentNum
+//        let publisherStageTwo = ["1", "20", "A", "C", "50", "70", "100"].publisher
+//        var total = 0
+//        publisherStageTwo
+//            .map { Double($0) ?? 0.0 }
+//            .filter { $0 != 0.0 }
+//            .scan(0, { lastNum, currentNum in
+//                lastNum + currentNum
+//            })
+//            .sink { number in
+//                total += 1
+//                print("Current sum: \(number)")
+//                print("Current iteration: \(total)")
+//                print("Average = \(number / Double(total))\n")
+//            }
+//            .store(in: &cancellables)
+        
+   // MARK: - Lesson 3 Home Work
+        
+        let queue = DispatchQueue(label: "Collect")
+        let publisherString = PassthroughSubject<String, Never>()
+        
+        queue.asyncAfter(deadline: .now() + 1.0, execute: {
+            publisherString.send("Hello ")
+            publisherString.send("world, ")
+            publisherString.send("Combine!")
+        } )
+       
+        
+        publisherString
+            .collect(.byTime(queue, .seconds(0.5)))
+            .map(UnicodeScalar)
+            .sink(receiveCompletion: { completion in
+            print("received the completion", String(describing: completion)) }, receiveValue: { responseValue in
+            print(responseValue)
             })
-            .sink { number in
-                total += 1
-                print("Current sum: \(number)")
-                print("Current iteration: \(total)")
-                print("Average = \(number / Double(total))\n")
-            }
             .store(in: &cancellables)
+       
     }
     
 }
