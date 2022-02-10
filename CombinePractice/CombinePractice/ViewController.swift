@@ -82,32 +82,43 @@ class ViewController: UIViewController {
         ]
         
         let queue = DispatchQueue(label: "Collect")
-        let publisher = PassthroughSubject<String, Never>()
+        let publisherOne = PassthroughSubject<String, Never>()
+        let publisherTwo = PassthroughSubject<String, Never>()
         
-        let subscriberString = publisher
+        publisherOne
             .collect(.byTime(queue, .seconds(0.5)))
+            .map({ strings -> String in
+                var string = String()
+                for str in strings {
+                    string += str
+                }
+                return string
+            })
+            .merge(with: publisherTwo)
             .sink(receiveCompletion: { completion in
-                print("String Subscriber received the completion ", String(describing: completion)) },
+                print("String Publisher received the completion ", String(describing: completion)) },
                   receiveValue: { responseValue in
-                print("String Subscriber received: \(responseValue)") })
+                print("String Publisher received: \(responseValue)") })
             .store(in: &cancellables)
         
-        let subscriberEmoji = publisher
+        publisherTwo
             .debounce(for: .seconds(0.9) , scheduler: queue)
             .share()
             .sink(receiveCompletion: { completion in
-                print("Emoji Subscriber received the completion", String(describing: completion)) },
+                print("Emoji Publisher received the completion", String(describing: completion)) },
                   receiveValue: { responseValue in
-                print("Emoji subscriber received: \(responseValue)") })
+                print("Emoji Publisher received: \(responseValue)") })
             .store(in: &cancellables)
         
         for item in subject {
             queue.asyncAfter(deadline: .now() + item.0) {
-                publisher.send(item.1)
+                publisherOne.send(item.1)
+                publisherTwo.send(item.1)
             }
         }
         queue.asyncAfter(deadline: .now() + subject.last!.0 + 2) {
-            publisher.send(completion: .finished)
+            publisherOne.send(completion: .finished)
+            publisherTwo.send(completion: .finished)
         }
     }
     
